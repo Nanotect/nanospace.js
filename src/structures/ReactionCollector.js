@@ -49,7 +49,7 @@ class ReactionCollector extends Collector {
     this._handleGuildDeletion = this._handleGuildDeletion.bind(this);
     this._handleMessageDeletion = this._handleMessageDeletion.bind(this);
 
-    this.client.incrementMaxListeners();
+    if (this.client.getMaxListeners() !== 0) this.client.setMaxListeners(this.client.getMaxListeners() + 1);
     this.client.on(Events.MESSAGE_REACTION_ADD, this.handleCollect);
     this.client.on(Events.MESSAGE_REACTION_REMOVE, this.handleDispose);
     this.client.on(Events.MESSAGE_REACTION_REMOVE_ALL, this.empty);
@@ -64,7 +64,7 @@ class ReactionCollector extends Collector {
       this.client.removeListener(Events.MESSAGE_DELETE, this._handleMessageDeletion);
       this.client.removeListener(Events.CHANNEL_DELETE, this._handleChannelDeletion);
       this.client.removeListener(Events.GUILD_DELETE, this._handleGuildDeletion);
-      this.client.decrementMaxListeners();
+      if (this.client.getMaxListeners() !== 0) this.client.setMaxListeners(this.client.getMaxListeners() - 1);
     });
 
     this.on('collect', (reaction, user) => {
@@ -81,11 +81,10 @@ class ReactionCollector extends Collector {
   /**
    * Handles an incoming reaction for possible collection.
    * @param {MessageReaction} reaction The reaction to possibly collect
-   * @param {User} user The user that added the reaction
    * @returns {?Snowflake|string}
    * @private
    */
-  collect(reaction, user) {
+  collect(reaction) {
     /**
      * Emitted whenever a reaction is collected.
      * @event ReactionCollector#collect
@@ -93,19 +92,6 @@ class ReactionCollector extends Collector {
      * @param {User} user The user that added the reaction
      */
     if (reaction.message.id !== this.message.id) return null;
-
-    /**
-     * Emitted whenever a reaction is newly created on a message. Will emit only when a new reaction is
-     * added to the message, as opposed to {@link Collector#collect} which which will
-     * be emitted even when a reaction has already been added to the message.
-     * @event ReactionCollector#create
-     * @param {MessageReaction} reaction The reaction that was added
-     * @param {User} user The user that added the reaction
-     */
-    if (reaction.count === 1 && this.filter(reaction, user, this.collected)) {
-      this.emit('create', reaction, user);
-    }
-
     return ReactionCollector.key(reaction);
   }
 
@@ -117,7 +103,7 @@ class ReactionCollector extends Collector {
    */
   dispose(reaction, user) {
     /**
-     * Emitted when the reaction had all the users removed and the `dispose` option is set to true.
+     * Emitted whenever a reaction is disposed of.
      * @event ReactionCollector#dispose
      * @param {MessageReaction} reaction The reaction that was disposed of
      * @param {User} user The user that removed the reaction
@@ -125,7 +111,9 @@ class ReactionCollector extends Collector {
     if (reaction.message.id !== this.message.id) return null;
 
     /**
-     * Emitted when the reaction had one user removed and the `dispose` option is set to true.
+     * Emitted whenever a reaction is removed from a message. Will emit on all reaction removals,
+     * as opposed to {@link Collector#dispose} which will only be emitted when the entire reaction
+     * is removed.
      * @event ReactionCollector#remove
      * @param {MessageReaction} reaction The reaction that was removed
      * @param {User} user The user that removed the reaction
@@ -146,7 +134,7 @@ class ReactionCollector extends Collector {
     this.checkEnd();
   }
 
-  get endReason() {
+  endReason() {
     if (this.options.max && this.total >= this.options.max) return 'limit';
     if (this.options.maxEmojis && this.collected.size >= this.options.maxEmojis) return 'emojiLimit';
     if (this.options.maxUsers && this.users.size >= this.options.maxUsers) return 'userLimit';

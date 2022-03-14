@@ -5,7 +5,7 @@
   </p>
   <br />
   <p>
-    <a href="https://discord.gg/bRCvFy9"><img src="https://img.shields.io/discord/222078108977594368?color=7289da&logo=discord&logoColor=white" alt="Discord server" /></a>
+    <a href="https://discord.gg/bRCvFy9"><img src="https://discordapp.com/api/guilds/222078108977594368/embed.png" alt="Discord server" /></a>
     <a href="https://www.npmjs.com/package/discord.js"><img src="https://img.shields.io/npm/v/discord.js.svg?maxAge=3600" alt="NPM version" /></a>
     <a href="https://www.npmjs.com/package/discord.js"><img src="https://img.shields.io/npm/dt/discord.js.svg?maxAge=3600" alt="NPM downloads" /></a>
     <a href="https://github.com/discordjs/discord.js/actions"><img src="https://github.com/discordjs/discord.js/workflows/Testing/badge.svg" alt="Build status" /></a>
@@ -16,6 +16,9 @@
     <a href="https://nodei.co/npm/discord.js/"><img src="https://nodei.co/npm/discord.js.png?downloads=true&stars=true" alt="npm installnfo" /></a>
   </p>
 </div>
+
+### I don't take any responsibility for blocked Discord accounts that used this module.
+### Using this on a user account is prohibited by the [Discord TOS](https://discordapp.com/terms) and can lead to the account block.
 
 ## Table of contents
 
@@ -32,7 +35,7 @@
 ## About
 
 discord.js is a powerful [Node.js](https://nodejs.org) module that allows you to easily interact with the
-[Discord API](https://discord.com/developers/docs/intro).
+[Discord API](https://discordapp.com/developers/docs/intro).
 
 - Object-oriented
 - Predictable abstractions
@@ -41,7 +44,7 @@ discord.js is a powerful [Node.js](https://nodejs.org) module that allows you to
 
 ## Installation
 
-**Node.js 14.0.0 or newer is required.**  
+**Node.js 12.0.0 or newer is required.**  
 Ignore any warnings about unmet peer dependencies, as they're all optional.
 
 Without voice support: `npm install discord.js`  
@@ -57,7 +60,7 @@ For production bots, using @discordjs/opus should be considered a necessity, esp
 ### Optional packages
 
 - [zlib-sync](https://www.npmjs.com/package/zlib-sync) for WebSocket data compression and inflation (`npm install zlib-sync`)
-- [erlpack](https://github.com/discord/erlpack) for significantly faster WebSocket data (de)serialisation (`npm install discord/erlpack`)
+- [erlpack](https://github.com/discordapp/erlpack) for significantly faster WebSocket data (de)serialisation (`npm install discordapp/erlpack`)
 - One of the following packages can be installed for faster voice packet encryption and decryption:
   - [sodium](https://www.npmjs.com/package/sodium) (`npm install sodium`)
   - [libsodium.js](https://www.npmjs.com/package/libsodium-wrappers) (`npm install libsodium-wrappers`)
@@ -67,8 +70,8 @@ For production bots, using @discordjs/opus should be considered a necessity, esp
 ## Example usage
 
 ```js
-const { Client, Intents } = require('discord.js');
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+const Discord = require('discord.js');
+const client = new Discord.Client();
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
@@ -76,7 +79,7 @@ client.on('ready', () => {
 
 client.on('message', msg => {
   if (msg.content === 'ping') {
-    msg.channel.send('pong');
+    msg.reply('pong');
   }
 });
 

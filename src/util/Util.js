@@ -24,11 +24,12 @@ class Util {
   static flatten(obj, ...props) {
     if (!isObject(obj)) return obj;
 
-    const objProps = Object.keys(obj)
-      .filter(k => !k.startsWith('_'))
-      .map(k => ({ [k]: true }));
-
-    props = objProps.length ? Object.assign(...objProps, ...props) : Object.assign({}, ...props);
+    props = Object.assign(
+      ...Object.keys(obj)
+        .filter(k => !k.startsWith('_'))
+        .map(k => ({ [k]: true })),
+      ...props,
+    );
 
     const out = {};
 
@@ -244,7 +245,6 @@ class Util {
     })
       .then(res => {
         if (res.ok) return res.json();
-        if (res.status === 401) throw new DiscordError('TOKEN_INVALID');
         throw res;
       })
       .then(data => data.shards * (1000 / guildsPerShard));
@@ -295,6 +295,30 @@ class Util {
     }
 
     return given;
+  }
+
+  /**
+   * Converts an ArrayBuffer or string to a Buffer.
+   * @param {ArrayBuffer|string} ab ArrayBuffer to convert
+   * @returns {Buffer}
+   * @private
+   */
+  static convertToBuffer(ab) {
+    if (typeof ab === 'string') ab = Util.str2ab(ab);
+    return Buffer.from(ab);
+  }
+
+  /**
+   * Converts a string to an ArrayBuffer.
+   * @param {string} str String to convert
+   * @returns {ArrayBuffer}
+   * @private
+   */
+  static str2ab(str) {
+    const buffer = new ArrayBuffer(str.length * 2);
+    const view = new Uint16Array(buffer);
+    for (var i = 0, strLen = str.length; i < strLen; i++) view[i] = str.charCodeAt(i);
+    return buffer;
   }
 
   /**
@@ -396,10 +420,6 @@ class Util {
    * - `DARK_GREY`
    * - `LIGHT_GREY`
    * - `DARK_NAVY`
-   * - `BLURPLE`
-   * - `GREYPLE`
-   * - `DARK_BUT_NOT_BLACK`
-   * - `NOT_QUITE_BLACK`
    * - `RANDOM`
    * @typedef {string|number|number[]} ColorResolvable
    */
@@ -540,15 +560,15 @@ class Util {
         const id = input.replace(/<|!|>|@/g, '');
         if (message.channel.type === 'dm') {
           const user = message.client.users.cache.get(id);
-          return user ? Util.removeMentions(`@${user.username}`) : input;
+          return user ? `@${user.username}` : input;
         }
 
         const member = message.channel.guild.members.cache.get(id);
         if (member) {
-          return Util.removeMentions(`@${member.displayName}`);
+          return `@${member.displayName}`;
         } else {
           const user = message.client.users.cache.get(id);
-          return user ? Util.removeMentions(`@${user.username}`) : input;
+          return user ? `@${user.username}` : input;
         }
       })
       .replace(/<#[0-9]+>/g, input => {
@@ -560,7 +580,20 @@ class Util {
         const role = message.guild.roles.cache.get(input.replace(/<|@|>|&/g, ''));
         return role ? `@${role.name}` : input;
       });
-    return str;
+    if (message.client.options.disableMentions === 'everyone') {
+      str = str.replace(/@([^<>@ ]*)/gmsu, (match, target) => {
+        if (target.match(/^[&!]?\d+$/)) {
+          return `@${target}`;
+        } else {
+          return `@\u200b${target}`;
+        }
+      });
+    }
+    if (message.client.options.disableMentions === 'all') {
+      return Util.removeMentions(str);
+    } else {
+      return str;
+    }
   }
 
   /**

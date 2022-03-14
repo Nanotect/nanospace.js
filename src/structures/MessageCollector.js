@@ -42,7 +42,7 @@ class MessageCollector extends Collector {
     this._handleChannelDeletion = this._handleChannelDeletion.bind(this);
     this._handleGuildDeletion = this._handleGuildDeletion.bind(this);
 
-    this.client.incrementMaxListeners();
+    if (this.client.getMaxListeners() !== 0) this.client.setMaxListeners(this.client.getMaxListeners() + 1);
     this.client.on(Events.MESSAGE_CREATE, this.handleCollect);
     this.client.on(Events.MESSAGE_DELETE, this.handleDispose);
     this.client.on(Events.MESSAGE_BULK_DELETE, bulkDeleteListener);
@@ -55,7 +55,7 @@ class MessageCollector extends Collector {
       this.client.removeListener(Events.MESSAGE_BULK_DELETE, bulkDeleteListener);
       this.client.removeListener(Events.CHANNEL_DELETE, this._handleChannelDeletion);
       this.client.removeListener(Events.GUILD_DELETE, this._handleGuildDeletion);
-      this.client.decrementMaxListeners();
+      if (this.client.getMaxListeners() !== 0) this.client.setMaxListeners(this.client.getMaxListeners() - 1);
     });
   }
 
@@ -90,7 +90,12 @@ class MessageCollector extends Collector {
     return message.channel.id === this.channel.id ? message.id : null;
   }
 
-  get endReason() {
+  /**
+   * Checks after un/collection to see if the collector is done.
+   * @returns {?string}
+   * @private
+   */
+  endReason() {
     if (this.options.max && this.collected.size >= this.options.max) return 'limit';
     if (this.options.maxProcessed && this.received === this.options.maxProcessed) return 'processedLimit';
     return null;

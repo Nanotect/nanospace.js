@@ -7,13 +7,6 @@ const Util = require('../util/Util');
  * Represents an embed in a message (image/video preview, rich embed, etc.)
  */
 class MessageEmbed {
-  /**
-   * @name MessageEmbed
-   * @kind constructor
-   * @memberof MessageEmbed
-   * @param {MessageEmbed|Object} [data={}] MessageEmbed to clone or raw embed data
-   */
-
   constructor(data = {}, skipValidation = false) {
     this.setup(data, skipValidation);
   }
@@ -29,40 +22,39 @@ class MessageEmbed {
      * * `link` - a link embed
      * @type {string}
      */
-    this.type = data.type || 'rich';
+    this.type = data.type;
 
     /**
      * The title of this embed
      * @type {?string}
      */
-    this.title = 'title' in data ? data.title : null;
+    this.title = data.title;
 
     /**
      * The description of this embed
      * @type {?string}
      */
-    this.description = 'description' in data ? data.description : null;
+    this.description = data.description;
 
     /**
      * The URL of this embed
      * @type {?string}
      */
-    this.url = 'url' in data ? data.url : null;
+    this.url = data.url;
 
     /**
      * The color of this embed
      * @type {?number}
      */
-    this.color = 'color' in data ? Util.resolveColor(data.color) : null;
+    this.color = Util.resolveColor(data.color);
 
     /**
      * The timestamp of this embed
      * @type {?number}
      */
-    this.timestamp = 'timestamp' in data ? new Date(data.timestamp).getTime() : null;
+    this.timestamp = data.timestamp ? new Date(data.timestamp).getTime() : null;
 
     /**
-     * Represents a field of a MessageEmbed
      * @typedef {Object} EmbedField
      * @property {string} name The name of this field
      * @property {string} value The value of this field
@@ -79,7 +71,6 @@ class MessageEmbed {
     }
 
     /**
-     * Represents the thumbnail of a MessageEmbed
      * @typedef {Object} MessageEmbedThumbnail
      * @property {string} url URL for this thumbnail
      * @property {string} proxyURL ProxyURL for this thumbnail
@@ -101,7 +92,6 @@ class MessageEmbed {
       : null;
 
     /**
-     * Represents the image of a MessageEmbed
      * @typedef {Object} MessageEmbedImage
      * @property {string} url URL for this image
      * @property {string} proxyURL ProxyURL for this image
@@ -123,7 +113,6 @@ class MessageEmbed {
       : null;
 
     /**
-     * Represents the video of a MessageEmbed
      * @typedef {Object} MessageEmbedVideo
      * @property {string} url URL of this video
      * @property {string} proxyURL ProxyURL for this video
@@ -146,7 +135,6 @@ class MessageEmbed {
       : null;
 
     /**
-     * Represents the author field of a MessageEmbed
      * @typedef {Object} MessageEmbedAuthor
      * @property {string} name The name of this author
      * @property {string} url URL of this author
@@ -168,7 +156,6 @@ class MessageEmbed {
       : null;
 
     /**
-     * Represents the provider of a MessageEmbed
      * @typedef {Object} MessageEmbedProvider
      * @property {string} name The name of this provider
      * @property {string} url URL of this provider
@@ -186,7 +173,6 @@ class MessageEmbed {
       : null;
 
     /**
-     * Represents the footer field of a MessageEmbed
      * @typedef {Object} MessageEmbedFooter
      * @property {string} text The text of this footer
      * @property {string} iconURL URL of the icon for this footer
@@ -231,19 +217,18 @@ class MessageEmbed {
   }
 
   /**
-   * The accumulated length for the embed title, description, fields, footer text, and author name
+   * The accumulated length for the embed title, description, fields and footer text
    * @type {number}
    * @readonly
    */
   get length() {
     return (
-      (this.title?.length ?? 0) +
-      (this.description?.length ?? 0) +
+      (this.title ? this.title.length : 0) +
+      (this.description ? this.description.length : 0) +
       (this.fields.length >= 1
         ? this.fields.reduce((prev, curr) => prev + curr.name.length + curr.value.length, 0)
         : 0) +
-      (this.footer?.text.length ?? 0) +
-      (this.author?.name.length ?? 0)
+      (this.footer ? this.footer.text.length : 0)
     );
   }
 

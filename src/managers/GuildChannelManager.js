@@ -46,7 +46,7 @@ class GuildChannelManager extends BaseManager {
    * @memberof GuildChannelManager
    * @instance
    * @param {GuildChannelResolvable} channel The GuildChannel resolvable to resolve
-   * @returns {?GuildChannel}
+   * @returns {?Channel}
    */
 
   /**
@@ -86,7 +86,7 @@ class GuildChannelManager extends BaseManager {
    *   permissionOverwrites: [
    *      {
    *        id: message.author.id,
-   *        deny: [Permissions.FLAGS.VIEW_CHANNEL],
+   *        deny: ['VIEW_CHANNEL'],
    *     },
    *   ],
    * })

@@ -24,13 +24,6 @@ class TextChannel extends GuildChannel {
      * @type {MessageManager}
      */
     this.messages = new MessageManager(this);
-
-    /**
-     * If the guild considers this channel NSFW
-     * @type {boolean}
-     * @readonly
-     */
-    this.nsfw = Boolean(data.nsfw);
     this._typing = new Map();
   }
 
@@ -43,7 +36,12 @@ class TextChannel extends GuildChannel {
      */
     this.topic = data.topic;
 
-    if (typeof data.nsfw !== 'undefined') this.nsfw = Boolean(data.nsfw);
+    /**
+     * If the guild considers this channel NSFW
+     * @type {boolean}
+     * @readonly
+     */
+    this.nsfw = data.nsfw;
 
     /**
      * The ID of the last message sent in this channel, if one was sent
@@ -84,16 +82,6 @@ class TextChannel extends GuildChannel {
    */
   setNSFW(nsfw, reason) {
     return this.edit({ nsfw }, reason);
-  }
-
-  /**
-   * Sets the type of this channel (only conversion between text and news is supported)
-   * @param {string} type The new channel type
-   * @param {string} [reason] Reason for changing the channel's type
-   * @returns {Promise<GuildChannel>}
-   */
-  setType(type, reason) {
-    return this.edit({ type }, reason);
   }
 
   /**
